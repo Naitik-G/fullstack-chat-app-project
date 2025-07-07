@@ -1,11 +1,13 @@
 import { useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { Image, Send, X } from "lucide-react";
+import { Image, Send, X, Smile } from "lucide-react"; // Import Smile icon
 import toast from "react-hot-toast";
+import EmojiPicker from "emoji-picker-react"; // Import EmojiPicker
 
 const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false); // State for emoji picker visibility
   const fileInputRef = useRef(null);
   const { sendMessage } = useChatStore();
 
@@ -42,13 +44,18 @@ const MessageInput = () => {
       setText("");
       setImagePreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      setShowEmojiPicker(false); // Close emoji picker after sending
     } catch (error) {
       console.error("Failed to send message:", error);
     }
   };
 
+  const handleEmojiClick = (emojiObject) => {
+    setText((prevText) => prevText + emojiObject.emoji);
+  };
+
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 w-full relative"> {/* Add relative for positioning emoji picker */}
       {imagePreview && (
         <div className="mb-3 flex items-center gap-2">
           <div className="relative">
@@ -60,7 +67,7 @@ const MessageInput = () => {
             <button
               onClick={removeImage}
               className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
-              flex items-center justify-center"
+                       flex items-center justify-center"
               type="button"
             >
               <X className="size-3" />
@@ -71,6 +78,15 @@ const MessageInput = () => {
 
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
         <div className="flex-1 flex gap-2">
+          {/* Emoji Button */}
+          <button
+            type="button"
+            className="btn btn-circle text-zinc-400"
+            onClick={() => setShowEmojiPicker((prev) => !prev)}
+          >
+            <Smile size={20} />
+          </button>
+
           <input
             type="text"
             className="w-full input input-bordered rounded-lg input-sm sm:input-md"
@@ -89,7 +105,7 @@ const MessageInput = () => {
           <button
             type="button"
             className={`hidden sm:flex btn btn-circle
-                     ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
+                            ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
             onClick={() => fileInputRef.current?.click()}
           >
             <Image size={20} />
@@ -103,6 +119,13 @@ const MessageInput = () => {
           <Send size={22} />
         </button>
       </form>
+
+      {/* Emoji Picker */}
+      {showEmojiPicker && (
+        <div className="absolute bottom-full mb-2 z-10"> {/* Position the emoji picker */}
+          <EmojiPicker onEmojiClick={handleEmojiClick} theme="dark" /> {/* Added theme for dark mode compatibility */}
+        </div>
+      )}
     </div>
   );
 };
