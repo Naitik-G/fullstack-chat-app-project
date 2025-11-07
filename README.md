@@ -2,7 +2,22 @@
 
 A full-stack, real-time chat application built with the MERN stack, featuring instant messaging, image sharing, and online status tracking.
 
-![Chat App Banner](https://fullstack-chat-app-project.onrender.com)
+### 🔗 Live Demo
+**[Live Demo →](https://fullstack-chat-app-project.onrender.com/)**
+
+
+### 📹 Video Preview
+
+![Chat preview](frontend\public\chat_preview.mp4)
+
+
+
+Experience the app in action! Click the link above to access the live deployment.
+
+**Demo Credentials:**
+- Email: `demo@example.com`
+- Password: `demo123`
+
 
 ## ✨ Features
 
@@ -29,7 +44,6 @@ A full-stack, real-time chat application built with the MERN stack, featuring in
 
 ### Frontend
 - **React.js** - UI library for building interactive interfaces
-- **Zustand** - Lightweight state management
 - **Tailwind CSS** - Utility-first CSS framework
 - **Lucide React** - Beautiful icon library
 - **Socket.io Client** - Real-time bidirectional communication
@@ -142,8 +156,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)
+- GitHub: [@Naitik-G](https://github.com/Naitik-G)
 
 ## 🙏 Acknowledgments
 
