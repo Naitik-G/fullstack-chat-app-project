@@ -31,6 +31,31 @@ io.on("connection", (socket) => {
     console.log("Online users:", Object.keys(userSocketMap));
   }
 
+   // NEW: Typing Indicator Events
+  socket.on("typing", ({ senderId, receiverId, isTyping }) => {
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      // Emit the typing status only to the receiver
+      io.to(receiverSocketId).emit("typing", { senderId, receiverId, isTyping });
+    }
+  });
+
+  // NEW: Messages Read Event (from client to server, then server emits to sender)
+  socket.on("messagesRead", async ({ readerId, chatRoomId, lastMessageId }) => {
+    // This event is primarily for the sender's client to know their message was read.
+    // The actual database update is handled by the markMessagesAsRead API call.
+    // Here, we just need to forward the information to the relevant sender.
+
+    // `chatRoomId` in this context from the client side will be the ID of the
+    // user whose messages were read (i.e., the sender's ID of those messages).
+    const senderSocketId = getReceiverSocketId(chatRoomId); // The original sender of the messages
+    const readerSocketId = getReceiverSocketId(readerId); // The user who read the messages
+
+    if (senderSocketId && senderSocketId !== readerSocketId) { // Don't send to self if reading own message
+        io.to(senderSocketId).emit("messagesRead", { readerId, chatRoomId, lastMessageId });
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log("A user disconnected", socket.id);
     

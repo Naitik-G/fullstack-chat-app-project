@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { Image, Send, X, Smile } from "lucide-react"; // Import Smile icon
 import toast from "react-hot-toast";
@@ -9,7 +9,10 @@ const MessageInput = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false); // State for emoji picker visibility
   const fileInputRef = useRef(null);
-  const { sendMessage } = useChatStore();
+  const { sendMessage, selectedUser, emitTypingStatus } = useChatStore(); // NEW: emitTypingStatus
+
+   // NEW: Typing indicator debounce
+  const typingTimeoutRef = useRef(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -45,6 +48,15 @@ const MessageInput = () => {
       setImagePreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       setShowEmojiPicker(false); // Close emoji picker after sending
+
+       // NEW: Stop typing after sending a message
+      if (selectedUser) {
+        emitTypingStatus(selectedUser._id, false);
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = null;
+        }
+      }
     } catch (error) {
       console.error("Failed to send message:", error);
     }
@@ -53,6 +65,37 @@ const MessageInput = () => {
   const handleEmojiClick = (emojiObject) => {
     setText((prevText) => prevText + emojiObject.emoji);
   };
+
+   // NEW: Handle typing status
+  const handleTextChange = (e) => {
+    const newText = e.target.value;
+    setText(newText);
+
+    if (selectedUser) {
+      // Emit typing true
+      emitTypingStatus(selectedUser._id, true);
+
+      // Clear any existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      // Set a new timeout to emit typing false after a delay
+      typingTimeoutRef.current = setTimeout(() => {
+        emitTypingStatus(selectedUser._id, false);
+        typingTimeoutRef.current = null;
+      }, 3000); // Stop typing after 3 seconds of inactivity
+    }
+  };
+
+  // NEW: Cleanup timeout on component unmount or chat change
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [selectedUser]); // Reset timeout when selectedUser changes
 
   return (
     <div className="p-4 w-full relative"> {/* Add relative for positioning emoji picker */}
